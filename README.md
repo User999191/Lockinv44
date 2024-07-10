@@ -1,4 +1,4 @@
--- Constants
+while wait(0) do 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -125,3 +125,4 @@ for _, player in ipairs(Players:GetPlayers()) do
 end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
+end)
