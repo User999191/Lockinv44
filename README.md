@@ -78,7 +78,7 @@ local function update3DESP(player)
 
                     local nameLabel = Instance.new("TextLabel")
                     nameLabel.Name = "NameLabel"
-                    nameLabel.Size = UDim2.new(2, 0, 2, 0)
+                    nameLabel.Size = UDim2.new(1, 0, 1, 0)
                     nameLabel.BackgroundTransparency = 1
                     nameLabel.Text = player.Name .. "\nDistance: " .. string.format("%.1f", dist) .. " studs"
                     nameLabel.TextColor3 = Color3.new(1, 1, 1)
