@@ -18,21 +18,16 @@ local function distance(point1, point2)
     return (point1 - point2).magnitude
 end
 
--- Function to update 3D ESP for a single player
 local function update3DESP(player)
-    -- Check if the player has a character and it is not the local player
     if player.Character and player.Character.Parent then
         local character = player.Character
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-        -- Check if the player's character has a humanoid root part
         if humanoidRootPart then
-            -- Calculate screen position for the ESP
             local position = humanoidRootPart.Position
-            local sizeVector = Vector3.new(5, 5, 5)  -- Fixed size (5x5x5)
+            local sizeVector = Vector3.new(5, 5, 5) -- Fixed size (5x5x5)
             local boxCorners = calculate3DBoxCorners(position, sizeVector)
 
-            -- Check if any corner of the box is in view
             local inView = false
             for _, corner in pairs(boxCorners) do
                 local screenPosition, onScreen = workspace.CurrentCamera:WorldToViewportPoint(corner)
@@ -42,7 +37,6 @@ local function update3DESP(player)
                 end
             end
 
-            -- Create or update 3D ESP box
             local espBox = character:FindFirstChild("3DESPBox")
             if inView then
                 if not espBox then
@@ -56,12 +50,11 @@ local function update3DESP(player)
                     espBox.Parent = character
                 end
 
-                -- Calculate and display distance
                 local localPosition = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and game.Players.LocalPlayer.Character.HumanoidRootPart.Position
                 if localPosition then
                     local dist = distance(localPosition, position)
+                    updateHealthNum(character, character.Humanoid.Health)
 
-                    -- Create or update name label with distance
                     local nameTag = character:FindFirstChild("NameTag")
                     if not nameTag then
                         nameTag = Instance.new("BillboardGui")
@@ -84,6 +77,27 @@ local function update3DESP(player)
                     -- Update name label with distance
                     nameTag.NameLabel.Text = player.Name .. "\nDistance: " .. string.format("%.1f", dist) .. " studs"
 
+                    local healthBar = character:FindFirstChild("HealthBar")
+                    if healthBar then
+                        -- Update HealthBar if exists
+                    end
+
+                    local highlight = character:FindFirstChild("Highlight")
+                    if not highlight then
+                        -- Create Highlight if not exists
+                    end
+                    local greatHighlight = character:FindFirstChild("GreatHighlight")
+                    if not greatHighlight then
+                        -- Create GreatHighlight if not exists
+                    end
+                end
+            else
+                -- Hide or remove ESP components if not in view
+            end
+        end
+    end
+end
+
                     -- Create or update health bar
                     local healthBar = character:FindFirstChild("HealthBar")
                     if not healthBar then
@@ -102,6 +116,29 @@ local function update3DESP(player)
                         healthFrame.BorderSizePixel = 0
                         healthFrame.Parent = healthBar
 
+                        local function updateHealthNum(character, health)
+    local healthNum = character:FindFirstChild("HealthNum")
+    if not healthNum then
+        healthNum = Instance.new("BillboardGui")
+        healthNum.Name = "HealthNum"
+        healthNum.Size = UDim2.new(0, 50, 0, 20)
+        healthNum.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the character's head
+        healthNum.Adornee = character.Head
+        healthNum.AlwaysOnTop = true
+        healthNum.Parent = character
+
+        local healthLabel = Instance.new("TextLabel")
+        healthLabel.Name = "HealthLabel"
+        healthLabel.Size = UDim2.new(1, 0, 1, 0)
+        healthLabel.BackgroundTransparency = 1
+        healthLabel.TextColor3 = Color3.new(1, 1, 1)
+        healthLabel.TextStrokeTransparency = 0.5
+        healthLabel.TextScaled = true
+        healthLabel.Parent = healthNum
+    end
+    -- Update health value
+    healthNum.HealthLabel.Text = "Health: " .. math.floor(health)
+end                         
                         local healthFill = Instance.new("Frame")
                         healthFill.Name = "HealthFill"
                         healthFill.Size = UDim2.new(1, 0, 1, 0)
