@@ -1,6 +1,6 @@
 -- Function to calculate the corners of the 3D ESP box with a fixed size
 local function calculate3DBoxCorners(position, size)
-    local halfSize = Vector3.new(2.5, 2.5, 2.5)  -- Half of the fixed size (5x5x5)
+    local halfSize = size / 2
     return {
         Vector3.new(position.X - halfSize.X, position.Y - halfSize.Y, position.Z - halfSize.Z),
         Vector3.new(position.X + halfSize.X, position.Y - halfSize.Y, position.Z - halfSize.Z),
@@ -21,7 +21,7 @@ end
 -- Function to update 3D ESP for a single player
 local function update3DESP(player)
     -- Check if the player has a character and it is not the local player
-    if player.Character and player ~= game.Players.LocalPlayer then
+    if player.Character and player.Character.Parent then
         local character = player.Character
         local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
@@ -52,47 +52,104 @@ local function update3DESP(player)
                     espBox.Size = sizeVector
                     espBox.AlwaysOnTop = true
                     espBox.ZIndex = 5
-                    espBox.Color3 = Color3.new(1, 1, 0) -- Yellow color
                     espBox.Transparency = 0.5
                     espBox.Parent = character
-                else
-                    espBox.Size = sizeVector
-                    espBox.Color3 = Color3.new(1, 1, 0) -- Yellow color
-                    espBox.Transparency = 0.5
                 end
 
                 -- Calculate and display distance
-                local localPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-                local dist = distance(localPosition, position)
+                local localPosition = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+                if localPosition then
+                    local dist = distance(localPosition, position)
 
-                -- Create or update name label with distance
-                local nameTag = character:FindFirstChild("NameTag")
-                if not nameTag then
-                    nameTag = Instance.new("BillboardGui")
-                    nameTag.Name = "NameTag"
-                    nameTag.Size = UDim2.new(0, 100, 0, 20)
-                    nameTag.StudsOffset = Vector3.new(0, 3, 0) -- Offset above the character's head
-                    nameTag.Adornee = character.Head
-                    nameTag.AlwaysOnTop = true
-                    nameTag.Parent = character
+                    -- Create or update name label with distance
+                    local nameTag = character:FindFirstChild("NameTag")
+                    if not nameTag then
+                        nameTag = Instance.new("BillboardGui")
+                        nameTag.Name = "NameTag"
+                        nameTag.Size = UDim2.new(0, 100, 0, 20)
+                        nameTag.StudsOffset = Vector3.new(0, 3, 0) -- Offset above the character's head
+                        nameTag.Adornee = character.Head
+                        nameTag.AlwaysOnTop = true
+                        nameTag.Parent = character
 
-                    local nameLabel = Instance.new("TextLabel")
-                    nameLabel.Name = "NameLabel"
-                    nameLabel.Size = UDim2.new(1, 0, 1, 0)
-                    nameLabel.BackgroundTransparency = 1
-                    nameLabel.Text = player.Name .. "\nDistance: " .. string.format("%.1f", dist) .. " studs"
-                    nameLabel.TextColor3 = Color3.new(1, 1, 1)
-                    nameLabel.TextStrokeTransparency = 0.5
-                    nameLabel.TextScaled = true
-                    nameLabel.Parent = nameTag
-                else
-                    local nameLabel = nameTag:FindFirstChild("NameLabel")
-                    if nameLabel then
-                        nameLabel.Text = player.Name .. "\nDistance: " .. string.format("%.1f", dist) .. " studs"
+                        local nameLabel = Instance.new("TextLabel")
+                        nameLabel.Name = "NameLabel"
+                        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+                        nameLabel.BackgroundTransparency = 1
+                        nameLabel.TextColor3 = Color3.new(1, 1, 1)
+                        nameLabel.TextStrokeTransparency = 0.5
+                        nameLabel.TextScaled = true
+                        nameLabel.Parent = nameTag
                     end
+                    -- Update name label with distance
+                    nameTag.NameLabel.Text = player.Name .. "\nDistance: " .. string.format("%.1f", dist) .. " studs"
+
+                    -- Create or update health bar
+                    local healthBar = character:FindFirstChild("HealthBar")
+                    if not healthBar then
+                        healthBar = Instance.new("BillboardGui")
+                        healthBar.Name = "HealthBar"
+                        healthBar.Size = UDim2.new(0, 100, 0, 10)
+                        healthBar.StudsOffset = Vector3.new(0, 2.5, 0) -- Offset above the character's head
+                        healthBar.Adornee = character.Head
+                        healthBar.AlwaysOnTop = true
+                        healthBar.Parent = character
+
+                        local healthFrame = Instance.new("Frame")
+                        healthFrame.Name = "HealthFrame"
+                        healthFrame.Size = UDim2.new(1, 0, 1, 0)
+                        healthFrame.BackgroundColor3 = Color3.new(1, 0, 0) -- Red color
+                        healthFrame.BorderSizePixel = 0
+                        healthFrame.Parent = healthBar
+
+                        local healthFill = Instance.new("Frame")
+                        healthFill.Name = "HealthFill"
+                        healthFill.Size = UDim2.new(1, 0, 1, 0)
+                        healthFill.BackgroundColor3 = Color3.new(0, 1, 0) -- Green color
+                        healthFill.BorderSizePixel = 0
+                        healthFill.Parent = healthFrame
+                    else
+                        local healthFill = healthBar.HealthFrame.HealthFill
+                        if healthFill then
+                            local humanoid = character:FindFirstChildOfClass("Humanoid")
+                            if humanoid then
+                                healthFill.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
+                            end
+                        end
+                    end
+
+                    -- Highlight and Great Highlight system
+                    local highlight = character:FindFirstChild("Highlight")
+                    if not highlight then
+                        highlight = Instance.new("BoxHandleAdornment")
+                        highlight.Name = "Highlight"
+                        highlight.Adornee = character
+                        highlight.Size = sizeVector * 1.1  -- Slightly larger than the ESP box
+                        highlight.AlwaysOnTop = true
+                        highlight.ZIndex = 5
+                        highlight.Transparency = 0.7
+                        highlight.Color3 = Color3.new(1, 1, 0)  -- Yellow color
+                        highlight.Parent = character
+                    end
+
+                    local greatHighlight = character:FindFirstChild("GreatHighlight")
+                    if not greatHighlight then
+                        greatHighlight = Instance.new("BoxHandleAdornment")
+                        greatHighlight.Name = "GreatHighlight"
+                        greatHighlight.Adornee = character
+                        greatHighlight.Size = sizeVector * 1.2  -- Larger than the ESP box
+                        greatHighlight.AlwaysOnTop = true
+                        greatHighlight.ZIndex = 5
+                        greatHighlight.Transparency = 0.5
+                        greatHighlight.Color3 = Color3.new(1, 1, 0)  -- Yellow color
+                        greatHighlight.Parent = character
+                    end
+
+                else
+                    -- Local player's position not available, handle accordingly
                 end
             else
-                -- Player is off-screen or not visible, hide or remove ESP box and name label
+                -- Player is off-screen or not visible, hide or remove ESP box, name label, health bar, and system health ESP
                 if espBox then
                     espBox:Destroy()
                 end
@@ -100,6 +157,21 @@ local function update3DESP(player)
                 local nameTag = character:FindFirstChild("NameTag")
                 if nameTag then
                     nameTag:Destroy()
+                end
+
+                local healthBar = character:FindFirstChild("HealthBar")
+                if healthBar then
+                    healthBar:Destroy()
+                end
+
+                local highlight = character:FindFirstChild("Highlight")
+                if highlight then
+                    highlight:Destroy()
+                end
+
+                local greatHighlight = character:FindFirstChild("GreatHighlight")
+                if greatHighlight then
+                    greatHighlight:Destroy()
                 end
             end
         end
