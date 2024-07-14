@@ -18,6 +18,32 @@ local function distance(point1, point2)
     return (point1 - point2).magnitude
 end
 
+-- Function to update health information on the ESP
+local function updateHealthNum(character, health)
+    local healthNum = character:FindFirstChild("HealthNum")
+    if not healthNum then
+        healthNum = Instance.new("BillboardGui")
+        healthNum.Name = "HealthNum"
+        healthNum.Size = UDim2.new(0, 50, 0, 20)
+        healthNum.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the character's head
+        healthNum.Adornee = character.Head
+        healthNum.AlwaysOnTop = true
+        healthNum.Parent = character
+
+        local healthLabel = Instance.new("TextLabel")
+        healthLabel.Name = "HealthLabel"
+        healthLabel.Size = UDim2.new(1, 0, 1, 0)
+        healthLabel.BackgroundTransparency = 1
+        healthLabel.TextColor3 = Color3.new(1, 1, 1)
+        healthLabel.TextStrokeTransparency = 0.5
+        healthLabel.TextScaled = true
+        healthLabel.Parent = healthNum
+    end
+    -- Update health value
+    healthNum.HealthLabel.Text = "Health: " .. math.floor(health)
+end
+
+-- Function to update 3D ESP for a specific player
 local function update3DESP(player)
     if player.Character and player.Character.Parent then
         local character = player.Character
@@ -84,80 +110,6 @@ local function update3DESP(player)
 
                     local highlight = character:FindFirstChild("Highlight")
                     if not highlight then
-                        -- Create Highlight if not exists
-                    end
-                    local greatHighlight = character:FindFirstChild("GreatHighlight")
-                    if not greatHighlight then
-                        -- Create GreatHighlight if not exists
-                    end
-                end
-            else
-                -- Hide or remove ESP components if not in view
-            end
-        end
-    end
-end
-
-                    -- Create or update health bar
-                    local healthBar = character:FindFirstChild("HealthBar")
-                    if not healthBar then
-                        healthBar = Instance.new("BillboardGui")
-                        healthBar.Name = "HealthBar"
-                        healthBar.Size = UDim2.new(0, 100, 0, 10)
-                        healthBar.StudsOffset = Vector3.new(0, 2.5, 0) -- Offset above the character's head
-                        healthBar.Adornee = character.Head
-                        healthBar.AlwaysOnTop = true
-                        healthBar.Parent = character
-
-                        local healthFrame = Instance.new("Frame")
-                        healthFrame.Name = "HealthFrame"
-                        healthFrame.Size = UDim2.new(1, 0, 1, 0)
-                        healthFrame.BackgroundColor3 = Color3.new(1, 0, 0) -- Red color
-                        healthFrame.BorderSizePixel = 0
-                        healthFrame.Parent = healthBar
-
-                        local function updateHealthNum(character, health)
-    local healthNum = character:FindFirstChild("HealthNum")
-    if not healthNum then
-        healthNum = Instance.new("BillboardGui")
-        healthNum.Name = "HealthNum"
-        healthNum.Size = UDim2.new(0, 50, 0, 20)
-        healthNum.StudsOffset = Vector3.new(0, 2, 0) -- Offset above the character's head
-        healthNum.Adornee = character.Head
-        healthNum.AlwaysOnTop = true
-        healthNum.Parent = character
-
-        local healthLabel = Instance.new("TextLabel")
-        healthLabel.Name = "HealthLabel"
-        healthLabel.Size = UDim2.new(1, 0, 1, 0)
-        healthLabel.BackgroundTransparency = 1
-        healthLabel.TextColor3 = Color3.new(1, 1, 1)
-        healthLabel.TextStrokeTransparency = 0.5
-        healthLabel.TextScaled = true
-        healthLabel.Parent = healthNum
-    end
-    -- Update health value
-    healthNum.HealthLabel.Text = "Health: " .. math.floor(health)
-end                         
-                        local healthFill = Instance.new("Frame")
-                        healthFill.Name = "HealthFill"
-                        healthFill.Size = UDim2.new(1, 0, 1, 0)
-                        healthFill.BackgroundColor3 = Color3.new(0, 1, 0) -- Green color
-                        healthFill.BorderSizePixel = 0
-                        healthFill.Parent = healthFrame
-                    else
-                        local healthFill = healthBar.HealthFrame.HealthFill
-                        if healthFill then
-                            local humanoid = character:FindFirstChildOfClass("Humanoid")
-                            if humanoid then
-                                healthFill.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
-                            end
-                        end
-                    end
-
-                    -- Highlight and Great Highlight system
-                    local highlight = character:FindFirstChild("Highlight")
-                    if not highlight then
                         highlight = Instance.new("BoxHandleAdornment")
                         highlight.Name = "Highlight"
                         highlight.Adornee = character
@@ -181,12 +133,9 @@ end
                         greatHighlight.Color3 = Color3.new(1, 1, 0)  -- Yellow color
                         greatHighlight.Parent = character
                     end
-
-                else
-                    -- Local player's position not available, handle accordingly
                 end
             else
-                -- Player is off-screen or not visible, hide or remove ESP box, name label, health bar, and system health ESP
+                -- Hide or remove ESP components if not in view
                 if espBox then
                     espBox:Destroy()
                 end
